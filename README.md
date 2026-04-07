@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# fi-nance
+
+Family finance tracker with a Neon Genesis Evangelion-inspired UI. Track bank accounts, cash, crypto, and precious metals across family members with real-time exchange rates and reporting.
+
+## Features
+
+- **Dashboard** - Net worth overview with category breakdown and portfolio trend chart
+- **Accounts & Ledger** - Manage bank, cash, crypto, and precious metal accounts with full transaction history
+- **Transactions** - Filterable ledger view across all accounts with tag-based categorization
+- **Reports** - Monthly breakdown, stacked category trends, and cash flow analysis
+- **Live Rates** - Real-time exchange rates and crypto/metal prices
+- **Multi-member** - Track finances per family member or view combined totals
+- **Multi-currency** - View all values in JPY, USD, EUR, or BTC
+
+## Tech Stack
+
+- Next.js 16 (App Router)
+- React 19
+- SQLite (better-sqlite3)
+- Tailwind CSS 4 + shadcn/ui
+- Recharts
+- React Three Fiber (background effect)
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Install dependencies
+npm install
+
+# Seed the database with sample data
+npm run seed
+
+# Start the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+  app/
+    api/          # REST API routes (accounts, ledger, members, prices, reports)
+    assets/       # Accounts & ledger page
+    members/      # Family member management
+    rates/        # Live exchange rates
+    reports/      # Financial reports & charts
+    transactions/ # Transaction history
+  components/     # UI components (header, nav, shadcn/ui)
+  lib/            # Database, context, utilities
+  scripts/        # Database seed script
+data/             # SQLite database (gitignored)
+```

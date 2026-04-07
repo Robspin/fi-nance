@@ -41,19 +41,19 @@ export function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 flex items-center justify-between px-4 sm:px-6 py-2.5 bg-[#0A0A0A]/95 backdrop-blur-sm border-b border-[rgba(255,72,0,0.2)]"
-      style={{ boxShadow: "0 1px 12px rgba(255, 72, 0, 0.08)" }}
+      className="sticky top-0 z-50 flex items-center justify-between px-4 sm:px-6 py-2.5 bg-[#0A0A0A]/95 backdrop-blur-sm border-b border-[rgba(0,255,255,0.15)]"
+      style={{ boxShadow: "0 1px 12px rgba(0, 255, 255, 0.06)" }}
     >
       <div className="flex items-center gap-3">
         <NervLogo />
-        <h1 className="text-lg sm:text-xl font-bold tracking-[0.15em] text-[#FF4800] nerv-text select-none">
+        <h1 className="text-lg sm:text-xl font-bold tracking-[0.15em] text-[#FF4800] nerv-text-accent select-none">
           fi-nance
         </h1>
       </div>
 
       <div className="hidden sm:flex items-center gap-4 text-[10px] text-[#777] tracking-wider uppercase">
         <span className="eva-blink text-[#00FFFF]">SYSTEM: NOMINAL</span>
-        <span className="text-[#FF4800] font-bold tabular-nums">{time}</span>
+        <span className="text-[#00FFFF] font-bold tabular-nums">{time}</span>
       </div>
 
       <div className="flex items-center gap-2">
@@ -79,7 +79,7 @@ export function Header() {
           onValueChange={(v) => v && setSelectedCurrency(v as "JPY" | "EUR" | "USD")}
         >
           <SelectTrigger className="w-[80px] text-xs h-8">
-            <span className="text-[#00FFFF]">{selectedCurrency}</span>
+            <span className="text-[#FF4800]">{selectedCurrency}</span>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="JPY">JPY</SelectItem>

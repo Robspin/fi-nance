@@ -274,7 +274,7 @@ export default function AssetsPage() {
   if (loading) {
     return (
       <div className="p-6 max-w-7xl mx-auto space-y-4">
-        <h2 className="text-2xl font-mono font-bold text-[#FF4800] nerv-text">ACCOUNTS & LEDGER</h2>
+        <h2 className="text-2xl font-mono font-bold text-[#00FFFF] nerv-text">ACCOUNTS & LEDGER</h2>
         <div className="space-y-3">
           <Skeleton className="h-16 rounded-lg" />
           <Skeleton className="h-16 rounded-lg" />
@@ -287,7 +287,7 @@ export default function AssetsPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-4">
-      <h2 className="text-2xl font-mono font-bold text-[#FF4800] nerv-text">ACCOUNTS & LEDGER</h2>
+      <h2 className="text-2xl font-mono font-bold text-[#00FFFF] nerv-text">ACCOUNTS & LEDGER</h2>
 
       {categories.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground">

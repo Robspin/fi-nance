@@ -61,32 +61,32 @@
   --card-foreground: #E0E0E0;
   --popover: #111111;
   --popover-foreground: #E0E0E0;
-  --primary: #FF4800;
+  --primary: #00FFFF;
   --primary-foreground: #000000;
-  --secondary: #00FFFF;
+  --secondary: #FF4800;
   --secondary-foreground: #000000;
   --muted: #1A1A1A;
   --muted-foreground: #777777;
   --accent: #1A1A1A;
   --accent-foreground: #E0E0E0;
   --destructive: #FF0000;
-  --border: rgba(255, 72, 0, 0.2);
-  --input: rgba(255, 72, 0, 0.2);
-  --ring: #FF4800;
-  --chart-1: #FF4800;
-  --chart-2: #00FFFF;
+  --border: rgba(0, 255, 255, 0.15);
+  --input: rgba(0, 255, 255, 0.15);
+  --ring: #00FFFF;
+  --chart-1: #00FFFF;
+  --chart-2: #FF4800;
   --chart-3: #00FF41;
   --chart-4: #FFD700;
   --chart-5: #7B2FBE;
   --radius: 0.25rem;
   --sidebar: #0D0D0D;
   --sidebar-foreground: #E0E0E0;
-  --sidebar-primary: #FF4800;
+  --sidebar-primary: #00FFFF;
   --sidebar-primary-foreground: #000000;
   --sidebar-accent: #1A1A1A;
   --sidebar-accent-foreground: #E0E0E0;
-  --sidebar-border: rgba(255, 72, 0, 0.2);
-  --sidebar-ring: #FF4800;
+  --sidebar-border: rgba(0, 255, 255, 0.15);
+  --sidebar-ring: #00FFFF;
 }
 
 .dark {
@@ -96,31 +96,31 @@
   --card-foreground: #E0E0E0;
   --popover: #111111;
   --popover-foreground: #E0E0E0;
-  --primary: #FF4800;
+  --primary: #00FFFF;
   --primary-foreground: #000000;
-  --secondary: #00FFFF;
+  --secondary: #FF4800;
   --secondary-foreground: #000000;
   --muted: #1A1A1A;
   --muted-foreground: #777777;
   --accent: #1A1A1A;
   --accent-foreground: #E0E0E0;
   --destructive: #FF0000;
-  --border: rgba(255, 72, 0, 0.2);
-  --input: rgba(255, 72, 0, 0.2);
-  --ring: #FF4800;
-  --chart-1: #FF4800;
-  --chart-2: #00FFFF;
+  --border: rgba(0, 255, 255, 0.15);
+  --input: rgba(0, 255, 255, 0.15);
+  --ring: #00FFFF;
+  --chart-1: #00FFFF;
+  --chart-2: #FF4800;
   --chart-3: #00FF41;
   --chart-4: #FFD700;
   --chart-5: #7B2FBE;
   --sidebar: #0D0D0D;
   --sidebar-foreground: #E0E0E0;
-  --sidebar-primary: #FF4800;
+  --sidebar-primary: #00FFFF;
   --sidebar-primary-foreground: #000000;
   --sidebar-accent: #1A1A1A;
   --sidebar-accent-foreground: #E0E0E0;
-  --sidebar-border: rgba(255, 72, 0, 0.2);
-  --sidebar-ring: #FF4800;
+  --sidebar-border: rgba(0, 255, 255, 0.15);
+  --sidebar-ring: #00FFFF;
 }
 
 @layer base {
@@ -178,45 +178,46 @@
   100% { background-color: rgba(0,0,0,0); }
 }
 
-/* NERV orange glow */
+/* NERV cyan glow (primary) */
 .nerv-glow {
-  box-shadow: 0 0 10px rgba(255, 72, 0, 0.3), 0 0 20px rgba(255, 72, 0, 0.1);
-}
-
-.nerv-glow-cyan {
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.3), 0 0 20px rgba(0, 255, 255, 0.1);
 }
 
-.nerv-text {
-  text-shadow: 0 0 10px rgba(255, 72, 0, 0.6), 0 0 20px rgba(255, 72, 0, 0.2);
+/* Orange-red accent glow */
+.nerv-glow-accent {
+  box-shadow: 0 0 10px rgba(255, 72, 0, 0.3), 0 0 20px rgba(255, 72, 0, 0.1);
 }
 
-.nerv-text-cyan {
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+.nerv-text {
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.15);
+}
+
+.nerv-text-accent {
+  text-shadow: 0 0 10px rgba(255, 72, 0, 0.6);
 }
 
 /* EVA border - angular, technical */
 .eva-border {
-  border: 1px solid rgba(255, 72, 0, 0.25);
+  border: 1px solid rgba(0, 255, 255, 0.2);
 }
 
 /* Hexagonal grid background pattern */
 .eva-hex-grid {
   background-image:
-    linear-gradient(30deg, rgba(255, 72, 0, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(255, 72, 0, 0.03) 87.5%),
-    linear-gradient(150deg, rgba(255, 72, 0, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(255, 72, 0, 0.03) 87.5%),
-    linear-gradient(30deg, rgba(255, 72, 0, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(255, 72, 0, 0.03) 87.5%),
-    linear-gradient(150deg, rgba(255, 72, 0, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(255, 72, 0, 0.03) 87.5%),
-    linear-gradient(60deg, rgba(255, 72, 0, 0.02) 25%, transparent 25.5%, transparent 75%, rgba(255, 72, 0, 0.02) 75%),
-    linear-gradient(60deg, rgba(255, 72, 0, 0.02) 25%, transparent 25.5%, transparent 75%, rgba(255, 72, 0, 0.02) 75%);
+    linear-gradient(30deg, rgba(0, 255, 255, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(0, 255, 255, 0.03) 87.5%),
+    linear-gradient(150deg, rgba(0, 255, 255, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(0, 255, 255, 0.03) 87.5%),
+    linear-gradient(30deg, rgba(0, 255, 255, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(0, 255, 255, 0.03) 87.5%),
+    linear-gradient(150deg, rgba(0, 255, 255, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(0, 255, 255, 0.03) 87.5%),
+    linear-gradient(60deg, rgba(0, 255, 255, 0.02) 25%, transparent 25.5%, transparent 75%, rgba(0, 255, 255, 0.02) 75%),
+    linear-gradient(60deg, rgba(0, 255, 255, 0.02) 25%, transparent 25.5%, transparent 75%, rgba(0, 255, 255, 0.02) 75%);
   background-size: 40px 70px;
   background-position: 0 0, 0 0, 20px 35px, 20px 35px, 0 0, 20px 35px;
 }
 
 /* Technical grid lines */
 .eva-grid {
-  background-image: linear-gradient(rgba(255, 72, 0, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 72, 0, 0.04) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(0, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -257,7 +258,7 @@
   position: absolute;
   width: 12px;
   height: 12px;
-  border-color: rgba(255, 72, 0, 0.5);
+  border-color: rgba(0, 255, 255, 0.4);
   border-style: solid;
   pointer-events: none;
 }

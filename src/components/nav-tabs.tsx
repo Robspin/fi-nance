@@ -17,7 +17,7 @@ export function NavTabs() {
 
   return (
     <nav
-      className="flex flex-nowrap gap-0 px-4 sm:px-6 bg-[#0A0A0A]/90 border-b border-[rgba(255,72,0,0.15)] overflow-x-auto relative z-10"
+      className="flex flex-nowrap gap-0 px-4 sm:px-6 bg-[#0A0A0A]/90 border-b border-[rgba(0,255,255,0.1)] overflow-x-auto relative z-10"
       style={{ scrollbarWidth: "none" }}
     >
       {tabs.map((tab) => {
@@ -32,8 +32,8 @@ export function NavTabs() {
             href={tab.href}
             className={`relative px-4 py-2.5 text-[11px] font-bold tracking-[0.12em] transition-colors border-b-2 ${
               isActive
-                ? "text-[#FF4800] border-[#FF4800] bg-[rgba(255,72,0,0.06)]"
-                : "text-[#666] border-transparent hover:text-[#999] hover:bg-[rgba(255,72,0,0.03)]"
+                ? "text-[#00FFFF] border-[#00FFFF] bg-[rgba(0,255,255,0.06)]"
+                : "text-[#666] border-transparent hover:text-[#999] hover:bg-[rgba(0,255,255,0.03)]"
             }`}
           >
             {tab.label}

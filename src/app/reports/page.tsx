@@ -99,7 +99,7 @@ export default function ReportsPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-mono font-bold text-[#FF4800] nerv-text">REPORTS</h2>
+        <h2 className="text-2xl font-mono font-bold text-[#00FFFF] nerv-text">REPORTS</h2>
         <div className="flex gap-1">
           {TIME_RANGES.map((tr) => (
             <Button
@@ -141,13 +141,13 @@ export default function ReportsPage() {
                       <stop offset="100%" stopColor="#FFD700" stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,72,0,0.06)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,255,0.06)" />
                   <XAxis dataKey="month" stroke="#555" fontSize={11} tickLine={false} />
                   <YAxis stroke="#555" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#111111",
-                      border: "1px solid rgba(255,72,0,0.3)",
+                      border: "1px solid rgba(0,255,255,0.2)",
                       borderRadius: "8px",
                       color: "#eee",
                       fontSize: "12px",
@@ -230,13 +230,13 @@ export default function ReportsPage() {
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={cashflowChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,72,0,0.06)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,255,0.06)" />
                   <XAxis dataKey="month" stroke="#555" fontSize={11} tickLine={false} />
                   <YAxis stroke="#555" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#111111",
-                      border: "1px solid rgba(255,72,0,0.3)",
+                      border: "1px solid rgba(0,255,255,0.2)",
                       borderRadius: "8px",
                       color: "#eee",
                       fontSize: "12px",

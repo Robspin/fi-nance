@@ -129,7 +129,7 @@ export default function RatesPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-mono font-bold text-[#FF4800] nerv-text">LIVE RATES</h2>
+        <h2 className="text-2xl font-mono font-bold text-[#00FFFF] nerv-text">LIVE RATES</h2>
         <div className="flex items-center gap-3">
           {fetchedAt && (
             <span className="text-xs text-muted-foreground font-mono">

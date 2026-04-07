@@ -10,42 +10,42 @@ function ATField() {
   const outerMatRef = useRef<THREE.LineBasicMaterial>(null)
   const innerMatRef = useRef<THREE.LineBasicMaterial>(null)
 
-  useFrame((_state, _delta) => {
+  useFrame(() => {
     if (outerRef.current) {
-      outerRef.current.rotation.x += 0.0008
-      outerRef.current.rotation.y += 0.0012
+      outerRef.current.rotation.x += 0.001
+      outerRef.current.rotation.y += 0.0015
     }
     if (innerRef.current) {
-      innerRef.current.rotation.x -= 0.001
-      innerRef.current.rotation.z += 0.0015
+      innerRef.current.rotation.x -= 0.0012
+      innerRef.current.rotation.z += 0.002
     }
     const t = Date.now() * 0.001
     if (outerMatRef.current) {
-      outerMatRef.current.opacity = 0.06 + 0.03 * Math.sin(t * 0.5)
+      outerMatRef.current.opacity = 0.18 + 0.08 * Math.sin(t * 0.5)
     }
     if (innerMatRef.current) {
-      innerMatRef.current.opacity = 0.04 + 0.03 * Math.sin(t * 0.7 + 1)
+      innerMatRef.current.opacity = 0.12 + 0.06 * Math.sin(t * 0.7 + 1)
     }
   })
 
   return (
     <>
       <lineSegments ref={outerRef}>
-        <wireframeGeometry args={[new THREE.IcosahedronGeometry(3, 1)]} />
+        <wireframeGeometry args={[new THREE.IcosahedronGeometry(3.5, 1)]} />
         <lineBasicMaterial
           ref={outerMatRef}
-          color={0xFF4800}
+          color={0x00FFFF}
           transparent
-          opacity={0.08}
+          opacity={0.2}
         />
       </lineSegments>
       <lineSegments ref={innerRef}>
-        <wireframeGeometry args={[new THREE.OctahedronGeometry(1.2, 0)]} />
+        <wireframeGeometry args={[new THREE.OctahedronGeometry(1.5, 0)]} />
         <lineBasicMaterial
           ref={innerMatRef}
-          color={0x00FFFF}
+          color={0xFF4800}
           transparent
-          opacity={0.06}
+          opacity={0.14}
         />
       </lineSegments>
     </>

@@ -151,7 +151,7 @@ export default function DashboardPage() {
       {/* Portfolio total */}
       <div className="text-center space-y-2">
         <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-medium">NET WORTH</p>
-        <p className="text-3xl sm:text-5xl font-mono font-bold text-[#FF4800] nerv-text">
+        <p className="text-3xl sm:text-5xl font-mono font-bold text-[#00FFFF] nerv-text">
           {formatCurrency(totalValue, selectedCurrency)}
         </p>
         {momChange !== 0 && (
@@ -215,25 +215,25 @@ export default function DashboardPage() {
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="gradTotal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#FF4800" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="#FF4800" stopOpacity={0} />
+                      <stop offset="0%" stopColor="#00FFFF" stopOpacity={0.2} />
+                      <stop offset="100%" stopColor="#00FFFF" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,72,0,0.06)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,255,0.06)" />
                   <XAxis dataKey="month" stroke="#555" fontSize={11} tickLine={false} />
                   <YAxis stroke="#555" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#111111",
-                      border: "1px solid rgba(255,72,0,0.3)",
+                      border: "1px solid rgba(0,255,255,0.2)",
                       borderRadius: "8px",
                       color: "#eee",
                       fontSize: "12px",
                     }}
                   />
-                  <Area type="monotone" dataKey="total" stroke="#FF4800" strokeWidth={2} fill="url(#gradTotal)" dot={false} />
-                  <Area type="monotone" dataKey="bank" stroke="#00FFFF" strokeWidth={1} fill="none" dot={false} />
-                  <Area type="monotone" dataKey="crypto" stroke="#7B2FBE" strokeWidth={1} fill="none" dot={false} />
+                  <Area type="monotone" dataKey="total" stroke="#00FFFF" strokeWidth={2} fill="url(#gradTotal)" dot={false} />
+                  <Area type="monotone" dataKey="bank" stroke="#3b82f6" strokeWidth={1} fill="none" dot={false} />
+                  <Area type="monotone" dataKey="crypto" stroke="#FF4800" strokeWidth={1} fill="none" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

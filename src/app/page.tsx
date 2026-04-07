@@ -48,10 +48,10 @@ type ReportData = {
 }
 
 const CATEGORY_CARDS = [
-  { key: "bank_total" as const, label: "Bank", color: "#3b82f6", icon: "🏦", marketType: null },
-  { key: "cash_total" as const, label: "Cash", color: "#00ff88", icon: "💴", marketType: null },
-  { key: "crypto_total" as const, label: "Crypto", color: "#00f0ff", icon: "₿", marketType: "crypto" },
-  { key: "metal_total" as const, label: "Metals", color: "#ffe600", icon: "🥇", marketType: "precious_metal" },
+  { key: "bank_total" as const, label: "Bank", color: "#00FFFF", icon: "🏦", marketType: null },
+  { key: "cash_total" as const, label: "Cash", color: "#00FF41", icon: "💴", marketType: null },
+  { key: "crypto_total" as const, label: "Crypto", color: "#FF4800", icon: "₿", marketType: "crypto" },
+  { key: "metal_total" as const, label: "Metals", color: "#FFD700", icon: "🥇", marketType: "precious_metal" },
 ]
 
 export default function DashboardPage() {
@@ -132,7 +132,7 @@ export default function DashboardPage() {
     return (
       <div className="p-6 space-y-6 max-w-7xl mx-auto">
         <div className="text-center space-y-2">
-          <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-medium">Net Worth</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-medium">NET WORTH</p>
           <Skeleton className="h-12 w-64 mx-auto" />
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -150,12 +150,12 @@ export default function DashboardPage() {
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       {/* Portfolio total */}
       <div className="text-center space-y-2">
-        <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-medium">Net Worth</p>
-        <p className="text-3xl sm:text-5xl font-mono font-bold text-[#00f0ff] neon-text">
+        <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-medium">NET WORTH</p>
+        <p className="text-3xl sm:text-5xl font-mono font-bold text-[#FF4800] nerv-text">
           {formatCurrency(totalValue, selectedCurrency)}
         </p>
         {momChange !== 0 && (
-          <p className="text-sm font-mono" style={{ color: momChange >= 0 ? "#00ff88" : "#ff3366" }}>
+          <p className="text-sm font-mono" style={{ color: momChange >= 0 ? "#00FF41" : "#FF0000" }}>
             {momChange >= 0 ? "+" : ""}{formatCurrency(momChange, selectedCurrency)}
             {" "}
             <span className="text-muted-foreground">({formatPercent(momPct)})</span>
@@ -172,7 +172,7 @@ export default function DashboardPage() {
           const pct = totalValue > 0 ? (val / totalValue) * 100 : 0
           const pnl = cat.marketType ? convert(marketPnL[cat.marketType] ?? 0) : null
           return (
-            <Card key={cat.key} className="cyber-border overflow-hidden">
+            <Card key={cat.key} className="eva-border overflow-hidden">
               <CardContent className="pt-4 pb-3 px-4">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-lg">{cat.icon}</span>
@@ -184,7 +184,7 @@ export default function DashboardPage() {
                   {formatCurrency(val, selectedCurrency)}
                 </p>
                 {pnl !== null && (
-                  <p className="text-[10px] font-mono mt-0.5" style={{ color: pnl >= 0 ? "#00ff88" : "#ff3366" }}>
+                  <p className="text-[10px] font-mono mt-0.5" style={{ color: pnl >= 0 ? "#00FF41" : "#FF0000" }}>
                     {pnl >= 0 ? "+" : "-"}{formatCurrency(Math.abs(pnl), selectedCurrency)}
                     {" "}
                     <span className="text-muted-foreground">Unrealized P/L</span>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
 
       {/* Portfolio trend chart */}
       {chartData.length > 1 && (
-        <Card className="cyber-border">
+        <Card className="eva-border">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">Portfolio Trend</CardTitle>
           </CardHeader>
@@ -215,25 +215,25 @@ export default function DashboardPage() {
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="gradTotal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00f0ff" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="#00f0ff" stopOpacity={0} />
+                      <stop offset="0%" stopColor="#FF4800" stopOpacity={0.2} />
+                      <stop offset="100%" stopColor="#FF4800" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,240,255,0.06)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,72,0,0.06)" />
                   <XAxis dataKey="month" stroke="#555" fontSize={11} tickLine={false} />
                   <YAxis stroke="#555" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "oklch(0.15 0.01 270)",
-                      border: "1px solid rgba(0,240,255,0.2)",
+                      backgroundColor: "#111111",
+                      border: "1px solid rgba(255,72,0,0.3)",
                       borderRadius: "8px",
                       color: "#eee",
                       fontSize: "12px",
                     }}
                   />
-                  <Area type="monotone" dataKey="total" stroke="#00f0ff" strokeWidth={2} fill="url(#gradTotal)" dot={false} />
-                  <Area type="monotone" dataKey="bank" stroke="#3b82f6" strokeWidth={1} fill="none" dot={false} />
-                  <Area type="monotone" dataKey="crypto" stroke="#ff00aa" strokeWidth={1} fill="none" dot={false} />
+                  <Area type="monotone" dataKey="total" stroke="#FF4800" strokeWidth={2} fill="url(#gradTotal)" dot={false} />
+                  <Area type="monotone" dataKey="bank" stroke="#00FFFF" strokeWidth={1} fill="none" dot={false} />
+                  <Area type="monotone" dataKey="crypto" stroke="#7B2FBE" strokeWidth={1} fill="none" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -243,7 +243,7 @@ export default function DashboardPage() {
 
       {/* Per-member breakdown */}
       {!selectedMember && memberTotals.length > 0 && (
-        <Card className="cyber-border">
+        <Card className="eva-border">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">Per-Member Breakdown</CardTitle>
           </CardHeader>

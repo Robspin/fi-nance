@@ -32,11 +32,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map(t => (
           <div
             key={t.id}
-            className="pointer-events-auto px-4 py-2.5 rounded-lg text-sm font-medium shadow-lg animate-in slide-in-from-bottom-2 fade-in duration-200"
+            className="pointer-events-auto px-4 py-2.5 text-xs font-bold tracking-wider uppercase shadow-lg animate-in slide-in-from-bottom-2 fade-in duration-200"
             style={{
-              backgroundColor: t.type === "success" ? "rgba(0,255,136,0.15)" : "rgba(255,51,102,0.15)",
-              border: `1px solid ${t.type === "success" ? "rgba(0,255,136,0.3)" : "rgba(255,51,102,0.3)"}`,
-              color: t.type === "success" ? "#00ff88" : "#ff3366",
+              backgroundColor: t.type === "success" ? "rgba(0,255,65,0.1)" : "rgba(255,0,0,0.1)",
+              border: `1px solid ${t.type === "success" ? "rgba(0,255,65,0.4)" : "rgba(255,0,0,0.4)"}`,
+              color: t.type === "success" ? "#00FF41" : "#FF0000",
               backdropFilter: "blur(8px)",
             }}
           >

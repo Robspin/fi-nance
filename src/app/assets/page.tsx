@@ -274,7 +274,7 @@ export default function AssetsPage() {
   if (loading) {
     return (
       <div className="p-6 max-w-7xl mx-auto space-y-4">
-        <h2 className="text-2xl font-mono font-bold text-[#00f0ff] neon-text">Accounts & Ledger</h2>
+        <h2 className="text-2xl font-mono font-bold text-[#FF4800] nerv-text">ACCOUNTS & LEDGER</h2>
         <div className="space-y-3">
           <Skeleton className="h-16 rounded-lg" />
           <Skeleton className="h-16 rounded-lg" />
@@ -287,7 +287,7 @@ export default function AssetsPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-4">
-      <h2 className="text-2xl font-mono font-bold text-[#00f0ff] neon-text">Accounts & Ledger</h2>
+      <h2 className="text-2xl font-mono font-bold text-[#FF4800] nerv-text">ACCOUNTS & LEDGER</h2>
 
       {categories.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground">
@@ -301,7 +301,7 @@ export default function AssetsPage() {
               const catAccounts = accountsForCategory(cat.id)
               const total = categoryTotal(cat.id)
               return (
-                <AccordionItem key={cat.id} value={cat.id} className="cyber-border rounded-lg mb-3 px-4">
+                <AccordionItem key={cat.id} value={cat.id} className="eva-border rounded-lg mb-3 px-4">
                   <AccordionTrigger className="hover:no-underline">
                     <div className="flex items-center gap-3 flex-1">
                       <span className="text-xl">{cat.icon}</span>
@@ -604,14 +604,14 @@ export default function AssetsPage() {
                         variant="outline"
                         className="text-[10px]"
                         style={{
-                          borderColor: e.amount >= 0 ? "#00ff88" : "#ff3366",
-                          color: e.amount >= 0 ? "#00ff88" : "#ff3366",
+                          borderColor: e.amount >= 0 ? "#00FF41" : "#FF0000",
+                          color: e.amount >= 0 ? "#00FF41" : "#FF0000",
                         }}
                       >
                         {e.entry_type}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right font-mono" style={{ color: e.amount >= 0 ? "#00ff88" : "#ff3366" }}>
+                    <TableCell className="text-right font-mono" style={{ color: e.amount >= 0 ? "#00FF41" : "#FF0000" }}>
                       {e.amount >= 0 ? "+" : ""}{e.amount}
                       {e.unit_price != null && (
                         <span className="text-muted-foreground text-[10px] ml-1">

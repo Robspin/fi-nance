@@ -99,7 +99,7 @@ export default function ReportsPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-mono font-bold text-[#00f0ff] neon-text">Reports</h2>
+        <h2 className="text-2xl font-mono font-bold text-[#00FFFF] nerv-text">REPORTS</h2>
         <div className="flex gap-1">
           {TIME_RANGES.map((tr) => (
             <Button
@@ -115,7 +115,7 @@ export default function ReportsPage() {
       </div>
 
       {chartData.length > 0 && (
-        <Card className="cyber-border">
+        <Card className="eva-border">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">Stacked Category Trend</CardTitle>
           </CardHeader>
@@ -125,39 +125,39 @@ export default function ReportsPage() {
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="gBank" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.05} />
+                      <stop offset="0%" stopColor="#00FFFF" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#00FFFF" stopOpacity={0.05} />
                     </linearGradient>
                     <linearGradient id="gCash" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00ff88" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#00ff88" stopOpacity={0.05} />
+                      <stop offset="0%" stopColor="#00FF41" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#00FF41" stopOpacity={0.05} />
                     </linearGradient>
                     <linearGradient id="gCrypto" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00f0ff" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#00f0ff" stopOpacity={0.05} />
+                      <stop offset="0%" stopColor="#FF4800" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#FF4800" stopOpacity={0.05} />
                     </linearGradient>
                     <linearGradient id="gMetals" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ffe600" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#ffe600" stopOpacity={0.05} />
+                      <stop offset="0%" stopColor="#FFD700" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#FFD700" stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,240,255,0.06)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,255,0.06)" />
                   <XAxis dataKey="month" stroke="#555" fontSize={11} tickLine={false} />
                   <YAxis stroke="#555" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "oklch(0.15 0.01 270)",
-                      border: "1px solid rgba(0,240,255,0.2)",
+                      backgroundColor: "#111111",
+                      border: "1px solid rgba(0,255,255,0.2)",
                       borderRadius: "8px",
                       color: "#eee",
                       fontSize: "12px",
                     }}
                   />
                   <Legend wrapperStyle={{ fontSize: "11px" }} />
-                  <Area type="monotone" dataKey="Bank" stackId="1" stroke="#3b82f6" fill="url(#gBank)" />
-                  <Area type="monotone" dataKey="Cash" stackId="1" stroke="#00ff88" fill="url(#gCash)" />
-                  <Area type="monotone" dataKey="Crypto" stackId="1" stroke="#00f0ff" fill="url(#gCrypto)" />
-                  <Area type="monotone" dataKey="Metals" stackId="1" stroke="#ffe600" fill="url(#gMetals)" />
+                  <Area type="monotone" dataKey="Bank" stackId="1" stroke="#00FFFF" fill="url(#gBank)" />
+                  <Area type="monotone" dataKey="Cash" stackId="1" stroke="#00FF41" fill="url(#gCash)" />
+                  <Area type="monotone" dataKey="Crypto" stackId="1" stroke="#FF4800" fill="url(#gCrypto)" />
+                  <Area type="monotone" dataKey="Metals" stackId="1" stroke="#FFD700" fill="url(#gMetals)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -165,7 +165,7 @@ export default function ReportsPage() {
         </Card>
       )}
 
-      <Card className="cyber-border">
+      <Card className="eva-border">
         <CardHeader className="pb-2">
           <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">Monthly Breakdown</CardTitle>
         </CardHeader>
@@ -206,10 +206,10 @@ export default function ReportsPage() {
                       <TableCell className="text-right font-mono text-muted-foreground text-xs">
                         {formatCurrency(convert(row.metal_total), selectedCurrency)}
                       </TableCell>
-                      <TableCell className="text-right font-mono text-xs" style={{ color: row.mom_change >= 0 ? "#00ff88" : "#ff3366" }}>
+                      <TableCell className="text-right font-mono text-xs" style={{ color: row.mom_change >= 0 ? "#00FF41" : "#FF0000" }}>
                         {formatCurrency(convert(row.mom_change), selectedCurrency)}
                       </TableCell>
-                      <TableCell className="text-right font-mono text-xs" style={{ color: row.mom_change_pct >= 0 ? "#00ff88" : "#ff3366" }}>
+                      <TableCell className="text-right font-mono text-xs" style={{ color: row.mom_change_pct >= 0 ? "#00FF41" : "#FF0000" }}>
                         {formatPercent(row.mom_change_pct)}
                       </TableCell>
                     </TableRow>
@@ -222,7 +222,7 @@ export default function ReportsPage() {
       </Card>
 
       {cashflowChartData.length > 0 && (
-        <Card className="cyber-border">
+        <Card className="eva-border">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">Cash Flow</CardTitle>
           </CardHeader>
@@ -230,21 +230,21 @@ export default function ReportsPage() {
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={cashflowChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,240,255,0.06)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,255,0.06)" />
                   <XAxis dataKey="month" stroke="#555" fontSize={11} tickLine={false} />
                   <YAxis stroke="#555" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "oklch(0.15 0.01 270)",
-                      border: "1px solid rgba(0,240,255,0.2)",
+                      backgroundColor: "#111111",
+                      border: "1px solid rgba(0,255,255,0.2)",
                       borderRadius: "8px",
                       color: "#eee",
                       fontSize: "12px",
                     }}
                   />
                   <Legend wrapperStyle={{ fontSize: "11px" }} />
-                  <Bar dataKey="Inflows" fill="#00ff88" opacity={0.85} />
-                  <Bar dataKey="Outflows" fill="#ff3366" opacity={0.85} />
+                  <Bar dataKey="Inflows" fill="#00FF41" opacity={0.85} />
+                  <Bar dataKey="Outflows" fill="#FF0000" opacity={0.85} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -252,7 +252,7 @@ export default function ReportsPage() {
         </Card>
       )}
 
-      <Card className="cyber-border">
+      <Card className="eva-border">
         <CardHeader className="pb-2">
           <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">Cash Flow Breakdown</CardTitle>
         </CardHeader>
@@ -274,13 +274,13 @@ export default function ReportsPage() {
                   {cashflow.map((row) => (
                     <TableRow key={row.month}>
                       <TableCell className="font-mono text-xs">{row.month}</TableCell>
-                      <TableCell className="text-right font-mono text-xs" style={{ color: "#00ff88" }}>
+                      <TableCell className="text-right font-mono text-xs" style={{ color: "#00FF41" }}>
                         {formatCurrency(convert(row.inflows), selectedCurrency)}
                       </TableCell>
-                      <TableCell className="text-right font-mono text-xs" style={{ color: "#ff3366" }}>
+                      <TableCell className="text-right font-mono text-xs" style={{ color: "#FF0000" }}>
                         {formatCurrency(convert(row.outflows), selectedCurrency)}
                       </TableCell>
-                      <TableCell className="text-right font-mono font-bold text-xs" style={{ color: row.net >= 0 ? "#00ff88" : "#ff3366" }}>
+                      <TableCell className="text-right font-mono font-bold text-xs" style={{ color: row.net >= 0 ? "#00FF41" : "#FF0000" }}>
                         {formatCurrency(convert(row.net), selectedCurrency)}
                       </TableCell>
                     </TableRow>

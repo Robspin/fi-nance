@@ -1,15 +1,11 @@
 import type { Metadata } from "next"
-import { Inter, JetBrains_Mono } from "next/font/google"
+import { JetBrains_Mono } from "next/font/google"
 import "./globals.css"
 import { AppProvider } from "@/lib/context"
 import { ToastProvider } from "@/lib/toast"
 import { Header } from "@/components/header"
 import { NavTabs } from "@/components/nav-tabs"
-
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-})
+import { EvaBackground } from "@/components/eva-background"
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
@@ -17,8 +13,8 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "FINANCE//TRACKER",
-  description: "Family finance tracker with cyberpunk aesthetics",
+  title: "fi-nance",
+  description: "NERV financial operations interface",
 }
 
 export default function RootLayout({
@@ -29,14 +25,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable} dark h-full antialiased`}
+      className={`${jetbrainsMono.variable} dark h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col font-mono eva-scanlines">
         <AppProvider>
           <ToastProvider>
+            <EvaBackground />
             <Header />
             <NavTabs />
-            <main className="flex-1 cyber-grid">{children}</main>
+            <main className="flex-1 eva-grid relative" style={{ zIndex: 1 }}>{children}</main>
           </ToastProvider>
         </AppProvider>
       </body>

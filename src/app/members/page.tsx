@@ -26,9 +26,9 @@ import { Badge } from "@/components/ui/badge"
 import { PlusIcon, PencilIcon, TrashIcon, UserIcon } from "lucide-react"
 
 const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
-  me: { bg: "rgba(0,240,255,0.15)", text: "#00f0ff" },
-  wife: { bg: "rgba(255,0,170,0.15)", text: "#ff00aa" },
-  child: { bg: "rgba(255,230,0,0.15)", text: "#ffe600" },
+  me: { bg: "rgba(255,72,0,0.15)", text: "#FF4800" },
+  wife: { bg: "rgba(0,255,255,0.15)", text: "#00FFFF" },
+  child: { bg: "rgba(255,215,0,0.15)", text: "#FFD700" },
 }
 
 export default function MembersPage() {
@@ -104,7 +104,7 @@ export default function MembersPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-mono font-bold text-[#00f0ff] neon-text">Members</h2>
+        <h2 className="text-2xl font-mono font-bold text-[#00FFFF] nerv-text">PILOTS</h2>
         <Button onClick={openAdd}>
           <PlusIcon className="size-4 mr-1" /> Add Member
         </Button>
@@ -123,7 +123,7 @@ export default function MembersPage() {
             return (
               <Card
                 key={member.id}
-                className="cyber-border relative group"
+                className="eva-border relative group"
                 style={{ boxShadow: `0 0 8px ${colors.bg}` }}
               >
                 <CardHeader>

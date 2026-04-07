@@ -124,12 +124,12 @@ export default function RatesPage() {
     })
   }
 
-  const typeColor: Record<string, string> = { exchange: "#3b82f6", crypto: "#00f0ff", metal: "#ffe600" }
+  const typeColor: Record<string, string> = { exchange: "#00FFFF", crypto: "#FF4800", metal: "#FFD700" }
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-mono font-bold text-[#00f0ff] neon-text">Live Rates</h2>
+        <h2 className="text-2xl font-mono font-bold text-[#00FFFF] nerv-text">LIVE RATES</h2>
         <div className="flex items-center gap-3">
           {fetchedAt && (
             <span className="text-xs text-muted-foreground font-mono">
@@ -143,7 +143,7 @@ export default function RatesPage() {
         </div>
       </div>
 
-      <Card className="cyber-border">
+      <Card className="eva-border">
         <CardHeader className="pb-2">
           <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">
             Exchange rates and portfolio asset prices
@@ -189,7 +189,7 @@ export default function RatesPage() {
       </Card>
 
       {accounts.filter(a => a.category_type === "crypto" || a.category_type === "precious_metal").length > 0 && (
-        <Card className="cyber-border">
+        <Card className="eva-border">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">
               Portfolio Holdings at Live Prices

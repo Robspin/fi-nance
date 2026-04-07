@@ -28,20 +28,20 @@ type LedgerEntryFull = LedgerEntry & {
 }
 
 const TAG_COLORS: Record<string, { bg: string; text: string }> = {
-  salary:     { bg: "rgba(0,255,136,0.15)",  text: "#00ff88" },
-  bonus:      { bg: "rgba(0,255,136,0.1)",   text: "#00dd77" },
-  rent:       { bg: "rgba(255,51,102,0.15)", text: "#ff3366" },
-  insurance:  { bg: "rgba(255,100,50,0.15)", text: "#ff6432" },
-  utilities:  { bg: "rgba(255,160,0,0.15)",  text: "#ffa000" },
-  groceries:  { bg: "rgba(80,200,255,0.15)", text: "#50c8ff" },
-  dining:     { bg: "rgba(200,100,255,0.15)",text: "#c864ff" },
-  atm:        { bg: "rgba(180,180,180,0.15)",text: "#aaaaaa" },
-  investment: { bg: "rgba(0,240,255,0.15)",  text: "#00f0ff" },
-  gift:       { bg: "rgba(255,180,100,0.15)",text: "#ffb464" },
-  allowance:  { bg: "rgba(100,200,100,0.15)",text: "#64c864" },
-  shopping:   { bg: "rgba(255,80,200,0.15)", text: "#ff50c8" },
-  travel:     { bg: "rgba(100,150,255,0.15)",text: "#6496ff" },
-  market:     { bg: "rgba(50,220,180,0.15)", text: "#32dcb4" },
+  salary:     { bg: "rgba(0,255,65,0.15)",   text: "#00FF41" },
+  bonus:      { bg: "rgba(0,204,51,0.1)",    text: "#00CC33" },
+  rent:       { bg: "rgba(255,0,0,0.15)",    text: "#FF0000" },
+  insurance:  { bg: "rgba(255,72,0,0.15)",   text: "#FF4800" },
+  utilities:  { bg: "rgba(255,160,0,0.15)",  text: "#FFA000" },
+  groceries:  { bg: "rgba(0,200,255,0.15)",  text: "#00C8FF" },
+  dining:     { bg: "rgba(123,47,190,0.15)", text: "#9B59B6" },
+  atm:        { bg: "rgba(180,180,180,0.15)",text: "#AAAAAA" },
+  investment: { bg: "rgba(0,255,255,0.15)",  text: "#00FFFF" },
+  gift:       { bg: "rgba(255,180,100,0.15)",text: "#FFB464" },
+  allowance:  { bg: "rgba(0,204,51,0.15)",   text: "#00CC33" },
+  shopping:   { bg: "rgba(123,47,190,0.15)", text: "#7B2FBE" },
+  travel:     { bg: "rgba(100,150,255,0.15)",text: "#6496FF" },
+  market:     { bg: "rgba(0,204,153,0.15)",  text: "#00CC99" },
   other:      { bg: "rgba(150,150,150,0.15)",text: "#969696" },
 }
 
@@ -66,8 +66,8 @@ function TypeBadge({ type, amount }: { type: string; amount: number }) {
       variant="outline"
       className="text-[10px]"
       style={{
-        borderColor: isPositive ? "#00ff88" : "#ff3366",
-        color: isPositive ? "#00ff88" : "#ff3366",
+        borderColor: isPositive ? "#00FF41" : "#FF0000",
+        color: isPositive ? "#00FF41" : "#FF0000",
       }}
     >
       {type}
@@ -131,7 +131,7 @@ export default function TransactionsPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-4">
-      <h2 className="text-2xl font-mono font-bold text-[#00f0ff] neon-text">Transactions</h2>
+      <h2 className="text-2xl font-mono font-bold text-[#00FFFF] nerv-text">TRANSACTIONS</h2>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
@@ -179,7 +179,7 @@ export default function TransactionsPage() {
       </div>
 
       {/* Table */}
-      <div className="cyber-border rounded-lg overflow-hidden overflow-x-auto">
+      <div className="eva-border rounded-lg overflow-hidden overflow-x-auto">
         {loading ? (
           <div className="py-20 text-center text-muted-foreground text-sm">Loading...</div>
         ) : filtered.length === 0 ? (
@@ -216,7 +216,7 @@ export default function TransactionsPage() {
                     </TableCell>
                     <TableCell
                       className="text-right font-mono font-bold text-sm"
-                      style={{ color: e.amount >= 0 ? "#00ff88" : "#ff3366" }}
+                      style={{ color: e.amount >= 0 ? "#00FF41" : "#FF0000" }}
                     >
                       {e.amount >= 0 ? "+" : ""}
                       {formatCurrency(displayAmount, selectedCurrency)}

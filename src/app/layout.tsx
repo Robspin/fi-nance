@@ -13,7 +13,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "NERV//FINANCE",
+  title: "fi-nance",
   description: "NERV financial operations interface",
 }
 

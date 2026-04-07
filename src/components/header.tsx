@@ -46,8 +46,8 @@ export function Header() {
     >
       <div className="flex items-center gap-3">
         <NervLogo />
-        <h1 className="text-lg sm:text-xl font-bold tracking-[0.15em] text-[#FF4800] nerv-text select-none uppercase">
-          NERV//FINANCE
+        <h1 className="text-lg sm:text-xl font-bold tracking-[0.15em] text-[#FF4800] nerv-text select-none">
+          fi-nance
         </h1>
       </div>
 

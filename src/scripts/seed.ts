@@ -68,9 +68,44 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_ledger_account ON ledger_entries(account_id);
   CREATE INDEX IF NOT EXISTS idx_ledger_date ON ledger_entries(entry_date);
   CREATE INDEX IF NOT EXISTS idx_ledger_account_date ON ledger_entries(account_id, entry_date);
+
+  CREATE TABLE IF NOT EXISTS tags (
+    name TEXT PRIMARY KEY,
+    color_bg TEXT NOT NULL,
+    color_text TEXT NOT NULL,
+    sort_order INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
 `);
 
 console.log('Tables created.');
+
+// Seed default tag palette
+const DEFAULT_TAGS = [
+  { name: 'salary',     color_bg: 'rgba(0,255,65,0.15)',   color_text: '#00FF41' },
+  { name: 'bonus',      color_bg: 'rgba(0,204,51,0.1)',    color_text: '#00CC33' },
+  { name: 'rent',       color_bg: 'rgba(255,0,0,0.15)',    color_text: '#FF0000' },
+  { name: 'insurance',  color_bg: 'rgba(255,72,0,0.15)',   color_text: '#FF4800' },
+  { name: 'utilities',  color_bg: 'rgba(255,160,0,0.15)',  color_text: '#FFA000' },
+  { name: 'groceries',  color_bg: 'rgba(0,200,255,0.15)',  color_text: '#00C8FF' },
+  { name: 'dining',     color_bg: 'rgba(123,47,190,0.15)', color_text: '#9B59B6' },
+  { name: 'atm',        color_bg: 'rgba(180,180,180,0.15)', color_text: '#AAAAAA' },
+  { name: 'investment', color_bg: 'rgba(0,255,255,0.15)',  color_text: '#00FFFF' },
+  { name: 'gift',       color_bg: 'rgba(255,180,100,0.15)', color_text: '#FFB464' },
+  { name: 'allowance',  color_bg: 'rgba(0,204,51,0.15)',   color_text: '#00CC33' },
+  { name: 'shopping',   color_bg: 'rgba(123,47,190,0.15)', color_text: '#7B2FBE' },
+  { name: 'travel',     color_bg: 'rgba(100,150,255,0.15)', color_text: '#6496FF' },
+  { name: 'market',     color_bg: 'rgba(0,204,153,0.15)',  color_text: '#00CC99' },
+  { name: 'other',      color_bg: 'rgba(150,150,150,0.15)', color_text: '#969696' },
+];
+const insertTag = db.prepare(
+  'INSERT INTO tags (name, color_bg, color_text, sort_order) VALUES (?, ?, ?, ?)'
+);
+for (let i = 0; i < DEFAULT_TAGS.length; i++) {
+  const t = DEFAULT_TAGS[i];
+  insertTag.run(t.name, t.color_bg, t.color_text, i);
+}
+console.log(`Created ${DEFAULT_TAGS.length} tags.`);
 
 // Create categories
 const categories = [

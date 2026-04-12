@@ -27,27 +27,17 @@ type LedgerEntryFull = LedgerEntry & {
   member_name: string
 }
 
-const TAG_COLORS: Record<string, { bg: string; text: string }> = {
-  salary:     { bg: "rgba(0,255,65,0.15)",   text: "#00FF41" },
-  bonus:      { bg: "rgba(0,204,51,0.1)",    text: "#00CC33" },
-  rent:       { bg: "rgba(255,0,0,0.15)",    text: "#FF0000" },
-  insurance:  { bg: "rgba(255,72,0,0.15)",   text: "#FF4800" },
-  utilities:  { bg: "rgba(255,160,0,0.15)",  text: "#FFA000" },
-  groceries:  { bg: "rgba(0,200,255,0.15)",  text: "#00C8FF" },
-  dining:     { bg: "rgba(123,47,190,0.15)", text: "#9B59B6" },
-  atm:        { bg: "rgba(180,180,180,0.15)",text: "#AAAAAA" },
-  investment: { bg: "rgba(0,255,255,0.15)",  text: "#00FFFF" },
-  gift:       { bg: "rgba(255,180,100,0.15)",text: "#FFB464" },
-  allowance:  { bg: "rgba(0,204,51,0.15)",   text: "#00CC33" },
-  shopping:   { bg: "rgba(123,47,190,0.15)", text: "#7B2FBE" },
-  travel:     { bg: "rgba(100,150,255,0.15)",text: "#6496FF" },
-  market:     { bg: "rgba(0,204,153,0.15)",  text: "#00CC99" },
-  other:      { bg: "rgba(150,150,150,0.15)",text: "#969696" },
-}
+const FALLBACK_TAG_COLOR = { bg: "rgba(150,150,150,0.15)", text: "#969696" }
 
-function TagBadge({ tag }: { tag: string | null }) {
+function TagBadge({
+  tag,
+  tagMap,
+}: {
+  tag: string | null
+  tagMap: Record<string, { bg: string; text: string }>
+}) {
   if (!tag) return <span className="text-muted-foreground text-xs">—</span>
-  const color = TAG_COLORS[tag] ?? { bg: "rgba(150,150,150,0.15)", text: "#969696" }
+  const color = tagMap[tag] ?? FALLBACK_TAG_COLOR
   return (
     <Badge
       variant="outline"
@@ -76,7 +66,7 @@ function TypeBadge({ type, amount }: { type: string; amount: number }) {
 }
 
 export default function TransactionsPage() {
-  const { selectedCurrency, members } = useApp()
+  const { selectedCurrency, members, tags } = useApp()
   const { convert } = useConvert()
   const [entries, setEntries] = useState<LedgerEntryFull[]>([])
   const [loading, setLoading] = useState(true)
@@ -108,14 +98,24 @@ export default function TransactionsPage() {
     return Array.from(seen).sort().reverse()
   }, [entries])
 
-  // Derive available tags from data
-  const availableTags = useMemo(() => {
-    const seen = new Set<string>()
-    for (const e of entries) {
-      if (e.tag) seen.add(e.tag)
+  // Lookup table for tag colors, plus a merged tag list that includes any
+  // orphan tags still present in ledger data (e.g. a tag was deleted but old
+  // entries still reference its name).
+  const tagMap = useMemo(() => {
+    const map: Record<string, { bg: string; text: string }> = {}
+    for (const t of tags) {
+      map[t.name] = { bg: t.color_bg, text: t.color_text }
     }
-    return Array.from(seen).sort()
-  }, [entries])
+    return map
+  }, [tags])
+
+  const availableTags = useMemo(() => {
+    const names = new Set<string>(tags.map((t) => t.name))
+    for (const e of entries) {
+      if (e.tag) names.add(e.tag)
+    }
+    return Array.from(names).sort()
+  }, [tags, entries])
 
   const filtered = useMemo(() => {
     return entries.filter((e) => {
@@ -222,7 +222,7 @@ export default function TransactionsPage() {
                       {formatCurrency(displayAmount, selectedCurrency)}
                     </TableCell>
                     <TableCell>
-                      <TagBadge tag={e.tag} />
+                      <TagBadge tag={e.tag} tagMap={tagMap} />
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
                       {e.description ?? "—"}

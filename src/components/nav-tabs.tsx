@@ -9,7 +9,8 @@ const tabs = [
   { label: "LEDGER", href: "/transactions" },
   { label: "REPORTS", href: "/reports" },
   { label: "RATES", href: "/rates" },
-  { label: "PILOTS", href: "/members" },
+  { label: "MEMBERS", href: "/members" },
+  { label: "TAGS", href: "/tags" },
 ]
 
 export function NavTabs() {

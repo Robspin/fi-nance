@@ -62,10 +62,10 @@ export function Header() {
           onValueChange={(v) => setSelectedMember(v === "all" ? null : v)}
         >
           <SelectTrigger className="w-[120px] sm:w-[140px] text-xs h-8">
-            <span>{selectedMember ? members.find(m => m.id === selectedMember)?.name ?? "ALL" : "ALL PILOTS"}</span>
+            <span>{selectedMember ? members.find(m => m.id === selectedMember)?.name ?? "ALL" : "ALL MEMBERS"}</span>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">ALL PILOTS</SelectItem>
+            <SelectItem value="all">ALL MEMBERS</SelectItem>
             {members.map((m) => (
               <SelectItem key={m.id} value={m.id}>
                 {m.name}

@@ -104,7 +104,7 @@ export default function MembersPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-mono font-bold text-[#00FFFF] nerv-text">PILOTS</h2>
+        <h2 className="text-2xl font-mono font-bold text-[#00FFFF] nerv-text">MEMBERS</h2>
         <Button onClick={openAdd}>
           <PlusIcon className="size-4 mr-1" /> Add Member
         </Button>

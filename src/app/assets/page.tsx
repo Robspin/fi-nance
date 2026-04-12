@@ -68,7 +68,7 @@ type EntryFormState = {
 const emptyAccountForm: AccountFormState = { name: "", symbol: "", notes: "", family_member_id: "" }
 
 export default function AssetsPage() {
-  const { selectedMember, selectedCurrency, members, categories, refreshCategories } = useApp()
+  const { selectedMember, selectedCurrency, members, categories, tags, refreshCategories, refreshTags } = useApp()
   const { convert } = useConvert()
   const { toast } = useToast()
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -108,7 +108,8 @@ export default function AssetsPage() {
   useEffect(() => {
     fetchAccounts()
     refreshCategories()
-  }, [fetchAccounts, refreshCategories])
+    refreshTags()
+  }, [fetchAccounts, refreshCategories, refreshTags])
 
   const isMarket = (cat: Category) => cat.type === "crypto" || cat.type === "precious_metal"
 
@@ -551,8 +552,8 @@ export default function AssetsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">None</SelectItem>
-                  {["salary", "rent", "bonus", "insurance", "utilities", "groceries", "dining", "atm", "investment", "gift", "allowance", "shopping", "travel", "market", "other"].map((t) => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  {tags.map((t) => (
+                    <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

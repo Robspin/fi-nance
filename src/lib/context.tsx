@@ -50,6 +50,13 @@ export type LedgerEntry = {
   balance_after: number | null
 }
 
+export type Tag = {
+  name: string
+  color_bg: string
+  color_text: string
+  sort_order: number
+}
+
 type CurrencyCode = "JPY" | "EUR" | "USD" | "BTC"
 
 type AppContextValue = {
@@ -59,8 +66,10 @@ type AppContextValue = {
   setSelectedCurrency: (c: CurrencyCode) => void
   members: Member[]
   categories: Category[]
+  tags: Tag[]
   refreshMembers: () => Promise<void>
   refreshCategories: () => Promise<void>
+  refreshTags: () => Promise<void>
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -70,6 +79,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>("JPY")
   const [members, setMembers] = useState<Member[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
 
   const refreshMembers = useCallback(async () => {
     try {
@@ -95,10 +105,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const refreshTags = useCallback(async () => {
+    try {
+      const res = await fetch("/api/tags")
+      if (res.ok) {
+        const data = await res.json()
+        setTags(data)
+      }
+    } catch {
+      // API not available yet
+    }
+  }, [])
+
   useEffect(() => {
     refreshMembers()
     refreshCategories()
-  }, [refreshMembers, refreshCategories])
+    refreshTags()
+  }, [refreshMembers, refreshCategories, refreshTags])
 
   return (
     <AppContext value={{
@@ -108,8 +131,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setSelectedCurrency,
       members,
       categories,
+      tags,
       refreshMembers,
       refreshCategories,
+      refreshTags,
     }}>
       {children}
     </AppContext>

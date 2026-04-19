@@ -35,12 +35,15 @@ export async function DELETE(
     return Response.json({ error: 'Member not found' }, { status: 404 });
   }
 
-  const assets = db.prepare('SELECT id FROM assets WHERE family_member_id = ?').all(id) as { id: string }[];
-  for (const asset of assets) {
-    db.prepare('DELETE FROM asset_snapshots WHERE asset_id = ?').run(asset.id);
-  }
-  db.prepare('DELETE FROM assets WHERE family_member_id = ?').run(id);
-  db.prepare('DELETE FROM family_members WHERE id = ?').run(id);
+  db.transaction(() => {
+    const accounts = db.prepare('SELECT id FROM accounts WHERE family_member_id = ?').all(id) as { id: string }[];
+    const deleteEntries = db.prepare('DELETE FROM ledger_entries WHERE account_id = ?');
+    for (const acc of accounts) {
+      deleteEntries.run(acc.id);
+    }
+    db.prepare('DELETE FROM accounts WHERE family_member_id = ?').run(id);
+    db.prepare('DELETE FROM family_members WHERE id = ?').run(id);
+  })();
 
   return Response.json({ success: true });
 }

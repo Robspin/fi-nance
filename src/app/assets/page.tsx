@@ -113,6 +113,12 @@ export default function AssetsPage() {
 
   const isMarket = (cat: Category) => cat.type === "crypto" || cat.type === "precious_metal"
 
+  const historyCategoryIsMarket = (() => {
+    if (!historyAccount) return false
+    const cat = categories.find(c => c.id === historyAccount.category_id)
+    return cat ? isMarket(cat) : false
+  })()
+
   const accountsForCategory = (catId: string) => accounts.filter((a) => a.category_id === catId)
 
   const accountValue = (a: Account) => {
@@ -292,7 +298,7 @@ export default function AssetsPage() {
 
       {categories.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground">
-          <p>No categories found. Run the seed script first.</p>
+          <p>No categories configured. Manage them from the Tags / Members section.</p>
         </div>
       ) : (
         <Accordion>
@@ -614,7 +620,7 @@ export default function AssetsPage() {
                     </TableCell>
                     <TableCell className="text-right font-mono" style={{ color: e.amount >= 0 ? "#00FF41" : "#FF0000" }}>
                       {e.amount >= 0 ? "+" : ""}{e.amount}
-                      {e.unit_price != null && (
+                      {e.unit_price != null && historyCategoryIsMarket && (
                         <span className="text-muted-foreground text-[10px] ml-1">
                           @{formatCurrency(e.unit_price, "JPY")}
                         </span>

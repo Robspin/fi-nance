@@ -62,19 +62,15 @@ export default function ReportsPage() {
   useEffect(() => {
     const params = new URLSearchParams({ months: String(selectedRange) })
     if (selectedMember) params.set("member_id", selectedMember)
-    fetch(`/api/reports/monthly?${params}`)
-      .then((r) => r.ok ? r.json() : null)
-      .then((d) => d?.monthly && setMonthly(d.monthly))
-      .catch(() => {})
-  }, [selectedMember, selectedRange])
+    const qs = params.toString()
 
-  useEffect(() => {
-    const params = new URLSearchParams({ months: String(selectedRange) })
-    if (selectedMember) params.set("member_id", selectedMember)
-    fetch(`/api/reports/cashflow?${params}`)
-      .then((r) => r.ok ? r.json() : null)
-      .then((d) => d?.months && setCashflow(d.months))
-      .catch(() => {})
+    Promise.all([
+      fetch(`/api/reports/monthly?${qs}`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch(`/api/reports/cashflow?${qs}`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    ]).then(([m, c]) => {
+      if (m?.monthly) setMonthly(m.monthly)
+      if (c?.months) setCashflow(c.months)
+    })
   }, [selectedMember, selectedRange])
 
   const chartData = useMemo(() => {

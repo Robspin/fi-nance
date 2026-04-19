@@ -11,6 +11,7 @@ const tabs = [
   { label: "RATES", href: "/rates" },
   { label: "MEMBERS", href: "/members" },
   { label: "TAGS", href: "/tags" },
+  { label: "IMPORT/EXPORT", href: "/import-export" },
 ]
 
 export function NavTabs() {

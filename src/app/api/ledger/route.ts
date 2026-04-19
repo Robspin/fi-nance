@@ -46,6 +46,9 @@ export async function GET(request: NextRequest) {
   return Response.json(entries);
 }
 
+const ENTRY_TYPES = new Set(['add', 'remove', 'adjustment']);
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { account_id, entry_date, entry_type, amount, unit_price, description, tag } = body;
@@ -56,10 +59,22 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+  if (!ENTRY_TYPES.has(entry_type)) {
+    return Response.json({ error: 'entry_type must be add, remove, or adjustment' }, { status: 400 });
+  }
+  if (!DATE_RE.test(entry_date)) {
+    return Response.json({ error: 'entry_date must be YYYY-MM-DD' }, { status: 400 });
+  }
+  const numericAmount = Number(amount);
+  if (!Number.isFinite(numericAmount)) {
+    return Response.json({ error: 'amount must be a finite number' }, { status: 400 });
+  }
+  if (unit_price != null && !Number.isFinite(Number(unit_price))) {
+    return Response.json({ error: 'unit_price must be a finite number' }, { status: 400 });
+  }
 
   const db = getDb();
 
-  // Verify account exists
   const account = db.prepare('SELECT * FROM accounts WHERE id = ?').get(account_id);
   if (!account) {
     return Response.json({ error: 'Account not found' }, { status: 404 });
@@ -67,19 +82,20 @@ export async function POST(request: NextRequest) {
 
   const id = uuidv4();
   const now = new Date().toISOString();
+  const finalAmount = entry_type === 'remove' ? -Math.abs(numericAmount) : Math.abs(numericAmount);
 
-  // For 'remove' entries, ensure amount is negative
-  const finalAmount = entry_type === 'remove' ? -Math.abs(amount) : Math.abs(amount);
+  const insertTx = db.transaction(() => {
+    const { balance: currentBalance } = db.prepare(
+      `SELECT COALESCE(SUM(amount), 0) AS balance FROM ledger_entries WHERE account_id = ? AND deleted_at IS NULL`
+    ).get(account_id) as { balance: number };
+    const balanceAfter = currentBalance + finalAmount;
 
-  const { balance: currentBalance } = db.prepare(
-    `SELECT COALESCE(SUM(amount), 0) AS balance FROM ledger_entries WHERE account_id = ? AND deleted_at IS NULL`
-  ).get(account_id) as { balance: number };
-  const balanceAfter = currentBalance + finalAmount;
-
-  db.prepare(
-    `INSERT INTO ledger_entries (id, account_id, entry_date, entry_type, amount, unit_price, description, tag, created_at, balance_after)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(id, account_id, entry_date, entry_type, finalAmount, unit_price ?? null, description ?? null, tag ?? null, now, balanceAfter);
+    db.prepare(
+      `INSERT INTO ledger_entries (id, account_id, entry_date, entry_type, amount, unit_price, description, tag, created_at, balance_after)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(id, account_id, entry_date, entry_type, finalAmount, unit_price ?? null, description ?? null, tag ?? null, now, balanceAfter);
+  });
+  insertTx.immediate();
 
   const entry = db.prepare('SELECT * FROM ledger_entries WHERE id = ?').get(id);
   return Response.json(entry, { status: 201 });

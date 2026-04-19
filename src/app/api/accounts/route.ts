@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     LEFT JOIN ledger_entries le ON le.account_id = acc.id AND le.deleted_at IS NULL
   `;
 
-  const conditions: string[] = [];
+  const conditions: string[] = ['COALESCE(acc.is_active, 1) = 1'];
   const params: string[] = [];
 
   if (memberId) {

@@ -95,11 +95,12 @@ export function getDb(): Database.Database {
     db.exec("ALTER TABLE ledger_entries ADD COLUMN balance_after REAL");
   }
 
-  // Migration: add is_active to accounts
+  // Migration: add is_active to accounts (defaults to 1; backfill any NULLs)
   const accCols = db.prepare("PRAGMA table_info(accounts)").all() as { name: string }[];
   if (!accCols.some(c => c.name === 'is_active')) {
     db.exec("ALTER TABLE accounts ADD COLUMN is_active INTEGER DEFAULT 1");
   }
+  db.exec("UPDATE accounts SET is_active = 1 WHERE is_active IS NULL");
 
   // Migration: if old 'assets' table exists, drop it (seed will recreate data)
   const tables = db.prepare(

@@ -49,6 +49,7 @@ db.exec(`
     symbol TEXT,
     currency TEXT DEFAULT 'JPY',
     notes TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT DEFAULT (datetime('now'))
   );
 
@@ -62,6 +63,7 @@ db.exec(`
     description TEXT,
     tag TEXT,
     balance_after REAL,
+    deleted_at TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   );
 

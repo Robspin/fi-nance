@@ -34,6 +34,7 @@ export type Account = {
   avg_unit_price: number
   cost_basis: number
   is_active: number
+  live_price: number | null
 }
 
 export type LedgerEntry = {

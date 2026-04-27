@@ -87,34 +87,46 @@ export default function DashboardPage() {
     ? ((current!.total_value - lastMonth.total_value) / lastMonth.total_value) * 100
     : 0
 
+  // Market value uses the live price when available, else the weighted-average
+  // purchase price (cost basis). Falling back to cost basis keeps the UI from
+  // collapsing to zero when the upstream price API is offline.
+  const marketPriceFor = (a: Account) =>
+    a.live_price != null && Number.isFinite(a.live_price)
+      ? a.live_price
+      : a.avg_unit_price
+
   const marketPnL = useMemo(() => {
     const result: Record<string, number> = { crypto: 0, precious_metal: 0 }
     for (const a of accounts) {
       if (a.category_type === "crypto" || a.category_type === "precious_metal") {
-        const marketValue = a.quantity * a.avg_unit_price
-        const pnl = marketValue - a.cost_basis
-        result[a.category_type] += pnl
+        // cost_basis is in JPY (sum of qty * stored unit_price); the live
+        // price helper also resolves to JPY, so subtract directly before
+        // converting to the user's selected display currency.
+        const marketValueJpy = a.quantity * marketPriceFor(a)
+        const pnlJpy = marketValueJpy - a.cost_basis
+        result[a.category_type] += convert(pnlJpy, "JPY")
       }
     }
     return result
-  }, [accounts])
+  }, [accounts, convert])
 
   const memberTotals = useMemo(() => {
     if (selectedMember) return []
     const grouped: Record<string, { name: string; total: number }> = {}
     for (const a of accounts) {
-      const val = a.category_type === "crypto" || a.category_type === "precious_metal"
-        ? a.quantity * a.avg_unit_price
-        : a.balance
+      const valDisplay =
+        a.category_type === "crypto" || a.category_type === "precious_metal"
+          ? convert(a.quantity * marketPriceFor(a), "JPY")
+          : convert(a.balance, a.currency || "JPY")
       if (!grouped[a.family_member_id]) {
         grouped[a.family_member_id] = { name: a.member_name, total: 0 }
       }
-      grouped[a.family_member_id].total += val
+      grouped[a.family_member_id].total += valDisplay
     }
     return Object.entries(grouped).map(([id, d]) => ({
       id,
       name: d.name,
-      total: convert(d.total),
+      total: d.total,
     }))
   }, [accounts, selectedMember, convert])
 

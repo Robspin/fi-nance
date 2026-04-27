@@ -124,7 +124,12 @@ export default function AssetsPage() {
   const accountValue = (a: Account) => {
     const cat = categories.find(c => c.id === a.category_id)
     if (cat && isMarket(cat)) {
-      return convert(a.quantity * a.avg_unit_price, a.currency || "JPY")
+      // live_price is JPY-per-unit (resolved server-side); fall back to the
+      // weighted-average purchase price when the upstream price feed is down.
+      const px = a.live_price != null && Number.isFinite(a.live_price)
+        ? a.live_price
+        : a.avg_unit_price
+      return convert(a.quantity * px, "JPY")
     }
     return convert(a.balance, a.currency || "JPY")
   }

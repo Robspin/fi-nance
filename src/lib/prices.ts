@@ -147,3 +147,68 @@ export async function fetchExchangeRates(
     return null;
   }
 }
+
+// Resolve "1 unit of `currency` is X JPY" for each requested currency. Always
+// includes JPY=1. Currencies that fail to resolve are simply omitted; callers
+// must decide how to handle a missing rate (typically: skip conversion / keep
+// the raw amount, with a warning surfaced earlier).
+export async function fetchToJpyRates(
+  currencies: Iterable<string>
+): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  out.set('JPY', 1);
+  const need = new Set<string>();
+  for (const c of currencies) {
+    const upper = (c || 'JPY').toUpperCase();
+    if (upper !== 'JPY') need.add(upper);
+  }
+  if (need.size === 0) return out;
+
+  const rates = await fetchExchangeRates('USD');
+  const usdToJpy = rates?.JPY;
+  if (!rates || !usdToJpy) return out; // degraded: only JPY known
+
+  for (const c of need) {
+    if (c === 'USD') {
+      out.set('USD', usdToJpy);
+      continue;
+    }
+    const perUsd = rates[c];
+    if (perUsd && Number.isFinite(perUsd) && perUsd > 0) {
+      out.set(c, usdToJpy / perUsd);
+    }
+  }
+  return out;
+}
+
+// Fetch live JPY prices for the given crypto + metal symbols in parallel.
+// Returns two maps keyed by symbol -> JPY-per-unit. Missing entries mean the
+// upstream did not return a usable price.
+export async function fetchJpyMarketPrices(
+  cryptoSymbols: Iterable<string>,
+  metalSymbols: Iterable<string>
+): Promise<{ crypto: Map<string, number>; metal: Map<string, number> }> {
+  const cryptoList = Array.from(new Set([...cryptoSymbols].filter(Boolean)));
+  const metalList = Array.from(new Set([...metalSymbols].filter(Boolean)));
+
+  const [cryptoRes, metalRes] = await Promise.all([
+    cryptoList.length ? fetchCryptoPrices(cryptoList, 'jpy') : Promise.resolve(null),
+    metalList.length ? fetchMetalPrices(metalList, 'jpy') : Promise.resolve(null),
+  ]);
+
+  const crypto = new Map<string, number>();
+  if (cryptoRes) {
+    for (const s of cryptoList) {
+      const p = cryptoRes[s]?.jpy;
+      if (typeof p === 'number' && Number.isFinite(p)) crypto.set(s, p);
+    }
+  }
+  const metal = new Map<string, number>();
+  if (metalRes) {
+    for (const s of metalList) {
+      const p = metalRes[s]?.jpy;
+      if (typeof p === 'number' && Number.isFinite(p)) metal.set(s, p);
+    }
+  }
+  return { crypto, metal };
+}

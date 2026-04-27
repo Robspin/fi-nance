@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       COALESCE(SUM(le.amount), 0) AS inflows
     FROM ledger_entries le
     JOIN accounts acc ON le.account_id = acc.id
-    WHERE le.amount > 0 AND le.deleted_at IS NULL AND acc.is_active = 1 ${memberFilter}
+    WHERE le.amount > 0 AND le.deleted_at IS NULL AND COALESCE(acc.is_active, 1) = 1 ${memberFilter}
     GROUP BY month
     ORDER BY month
   `;
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       ABS(COALESCE(SUM(le.amount), 0)) AS outflows
     FROM ledger_entries le
     JOIN accounts acc ON le.account_id = acc.id
-    WHERE le.amount < 0 AND le.deleted_at IS NULL AND acc.is_active = 1 ${memberFilter}
+    WHERE le.amount < 0 AND le.deleted_at IS NULL AND COALESCE(acc.is_active, 1) = 1 ${memberFilter}
     GROUP BY month
     ORDER BY month
   `;

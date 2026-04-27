@@ -1,30 +1,36 @@
 import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db';
+import { fetchJpyMarketPrices, fetchToJpyRates } from '@/lib/prices';
 
-interface BankCashMonthRow {
+type AssetType = 'bank' | 'cash' | 'crypto' | 'precious_metal';
+
+interface BankCashDeltaRow {
+  account_id: string;
+  currency: string | null;
+  category_type: 'bank' | 'cash';
   month: string;
-  category_type: string;
-  cumulative_total: number;
+  month_total: number;
 }
 
-interface MarketEntryRow {
+interface MarketDeltaRow {
   account_id: string;
-  category_type: string;
+  symbol: string | null;
+  currency: string | null;
+  category_type: 'crypto' | 'precious_metal';
   month: string;
   month_qty: number;
-  latest_price: number | null;
+  price_as_of_month: number | null;
 }
 
-interface CurrentBankCashRow {
-  category_type: string;
-  total: number;
+interface AccountRow {
+  id: string;
+  symbol: string | null;
+  currency: string | null;
+  category_type: AssetType;
+  balance: number;
 }
 
-interface CurrentMarketRow {
-  category_type: string;
-  total_qty: number;
-  latest_price: number | null;
-}
+const upperCurrency = (c: string | null | undefined) => (c || 'JPY').toUpperCase();
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -35,205 +41,251 @@ export async function GET(request: NextRequest) {
   const memberJoin = memberId ? 'AND acc.family_member_id = ?' : '';
   const memberParams = memberId ? [memberId] : [];
 
-  // Query 1: Bank/cash cumulative running sum per month (window function)
-  const bankCashMonthlySql = `
-    WITH monthly_sums AS (
-      SELECT
-        strftime('%Y-%m', le.entry_date) AS month,
-        c.type AS category_type,
-        SUM(le.amount) AS month_total
-      FROM ledger_entries le
-      JOIN accounts acc ON le.account_id = acc.id
-      JOIN asset_categories c ON acc.category_id = c.id
-      WHERE c.type IN ('bank', 'cash') AND le.deleted_at IS NULL AND acc.is_active = 1 ${memberJoin}
-      GROUP BY strftime('%Y-%m', le.entry_date), c.type
+  // Per-account, per-month bank/cash deltas in *account currency*.
+  const bankCashRaw = db
+    .prepare(
+      `SELECT le.account_id, acc.currency, c.type AS category_type,
+              strftime('%Y-%m', le.entry_date) AS month,
+              SUM(le.amount) AS month_total
+       FROM ledger_entries le
+       JOIN accounts acc ON le.account_id = acc.id
+       JOIN asset_categories c ON acc.category_id = c.id
+       WHERE c.type IN ('bank', 'cash')
+         AND le.deleted_at IS NULL
+         AND COALESCE(acc.is_active, 1) = 1
+         ${memberJoin}
+       GROUP BY le.account_id, acc.currency, c.type, strftime('%Y-%m', le.entry_date)
+       ORDER BY month`
     )
-    SELECT
-      month,
-      category_type,
-      SUM(month_total) OVER (
-        PARTITION BY category_type
-        ORDER BY month
-        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-      ) AS cumulative_total
-    FROM monthly_sums
-    ORDER BY month
-  `;
-  const bankCashMonthly = db.prepare(bankCashMonthlySql).all(...memberParams) as BankCashMonthRow[];
+    .all(...memberParams) as BankCashDeltaRow[];
 
-  // Query 2: Market entries aggregated per account per month + latest price up to that month
-  // Simple approach: get per-account per-month qty sums with a correlated subquery for price
-  const marketMonthlySql = `
-    SELECT
-      acc.id AS account_id,
-      c.type AS category_type,
-      strftime('%Y-%m', le.entry_date) AS month,
-      SUM(le.amount) AS month_qty,
-      (
-        SELECT le2.unit_price FROM ledger_entries le2
-        WHERE le2.account_id = acc.id
-          AND le2.unit_price IS NOT NULL
-          AND le2.deleted_at IS NULL
-          AND strftime('%Y-%m', le2.entry_date) <= strftime('%Y-%m', le.entry_date)
-        ORDER BY le2.entry_date DESC, le2.created_at DESC
-        LIMIT 1
-      ) AS latest_price
-    FROM ledger_entries le
-    JOIN accounts acc ON le.account_id = acc.id
-    JOIN asset_categories c ON acc.category_id = c.id
-    WHERE c.type IN ('crypto', 'precious_metal') AND le.deleted_at IS NULL AND acc.is_active = 1 ${memberJoin}
-    GROUP BY acc.id, c.type, strftime('%Y-%m', le.entry_date)
-    ORDER BY month
-  `;
-  const marketMonthlyRaw = db.prepare(marketMonthlySql).all(...memberParams) as MarketEntryRow[];
+  // Per-account, per-month market deltas (quantity) plus the most recent
+  // unit_price reported through that month — used as the historical valuation
+  // mark for past months. The current month gets re-marked with live prices
+  // below so the chart's tail visually matches the live `current` totals.
+  const marketRaw = db
+    .prepare(
+      `SELECT acc.id AS account_id, acc.symbol, acc.currency, c.type AS category_type,
+              strftime('%Y-%m', le.entry_date) AS month,
+              SUM(le.amount) AS month_qty,
+              (
+                SELECT le2.unit_price FROM ledger_entries le2
+                WHERE le2.account_id = acc.id
+                  AND le2.unit_price IS NOT NULL
+                  AND le2.deleted_at IS NULL
+                  AND strftime('%Y-%m', le2.entry_date) <= strftime('%Y-%m', le.entry_date)
+                ORDER BY le2.entry_date DESC, le2.created_at DESC
+                LIMIT 1
+              ) AS price_as_of_month
+       FROM ledger_entries le
+       JOIN accounts acc ON le.account_id = acc.id
+       JOIN asset_categories c ON acc.category_id = c.id
+       WHERE c.type IN ('crypto', 'precious_metal')
+         AND le.deleted_at IS NULL
+         AND COALESCE(acc.is_active, 1) = 1
+         ${memberJoin}
+       GROUP BY acc.id, acc.symbol, acc.currency, c.type, strftime('%Y-%m', le.entry_date)
+       ORDER BY month`
+    )
+    .all(...memberParams) as MarketDeltaRow[];
 
-  // Query 3: Current bank/cash totals
-  const currentBankCashSql = `
-    SELECT c.type AS category_type, COALESCE(SUM(le.amount), 0) AS total
-    FROM ledger_entries le
-    JOIN accounts acc ON le.account_id = acc.id
-    JOIN asset_categories c ON acc.category_id = c.id
-    WHERE c.type IN ('bank', 'cash') AND le.deleted_at IS NULL AND acc.is_active = 1 ${memberJoin}
-    GROUP BY c.type
-  `;
-  const currentBankCash = db.prepare(currentBankCashSql).all(...memberParams) as CurrentBankCashRow[];
+  // All currently-active accounts in this scope, with their net balance/qty.
+  // This is the canonical source for the `current` snapshot — any account
+  // missing from the delta queries (e.g. recently created with no entries)
+  // still appears here so it isn't silently dropped.
+  const currentAccts = db
+    .prepare(
+      `SELECT acc.id, acc.symbol, acc.currency, c.type AS category_type,
+              COALESCE(SUM(le.amount), 0) AS balance
+       FROM accounts acc
+       JOIN asset_categories c ON acc.category_id = c.id
+       LEFT JOIN ledger_entries le ON le.account_id = acc.id AND le.deleted_at IS NULL
+       WHERE COALESCE(acc.is_active, 1) = 1
+         ${memberJoin}
+       GROUP BY acc.id`
+    )
+    .all(...memberParams) as AccountRow[];
 
-  // Query 4: Current crypto/metal totals
-  const currentMarketSql = `
-    SELECT c.type AS category_type,
-      SUM(le.amount) AS total_qty,
-      (
-        SELECT le2.unit_price FROM ledger_entries le2
-        WHERE le2.account_id = acc.id AND le2.unit_price IS NOT NULL AND le2.deleted_at IS NULL
-        ORDER BY le2.entry_date DESC, le2.created_at DESC LIMIT 1
-      ) AS latest_price
-    FROM ledger_entries le
-    JOIN accounts acc ON le.account_id = acc.id
-    JOIN asset_categories c ON acc.category_id = c.id
-    WHERE c.type IN ('crypto', 'precious_metal') AND le.deleted_at IS NULL AND acc.is_active = 1 ${memberJoin}
-    GROUP BY acc.id, c.type
-  `;
-  const currentMarket = db.prepare(currentMarketSql).all(...memberParams) as CurrentMarketRow[];
+  // Resolve external rates once, in parallel.
+  const allCurrencies = new Set<string>();
+  for (const a of currentAccts) allCurrencies.add(upperCurrency(a.currency));
+  for (const r of bankCashRaw) allCurrencies.add(upperCurrency(r.currency));
+  for (const r of marketRaw) allCurrencies.add(upperCurrency(r.currency));
 
-  // --- JS post-processing ---
+  const cryptoSyms = currentAccts
+    .filter((a) => a.category_type === 'crypto' && a.symbol)
+    .map((a) => a.symbol as string);
+  const metalSyms = currentAccts
+    .filter((a) => a.category_type === 'precious_metal' && a.symbol)
+    .map((a) => a.symbol as string);
 
-  // Compute cumulative market values per month in JS (forward-filling gaps)
-  // Step 1: build per-account cumulative qty and latest price across months
-  const accountState: Record<string, { qty: number; price: number; type: string }> = {};
-  const marketMonthValues: Record<string, { crypto: number; metal: number }> = {};
+  const [fxRates, livePrices] = await Promise.all([
+    fetchToJpyRates(allCurrencies),
+    fetchJpyMarketPrices(cryptoSyms, metalSyms),
+  ]);
+  const fxToJpy = (currency: string | null | undefined) =>
+    fxRates.get(upperCurrency(currency)) ?? 1;
 
-  // Get sorted unique months from market data
-  const marketMonths = [...new Set(marketMonthlyRaw.map(r => r.month))].sort();
+  // --- Build historical monthly series ---
 
-  for (const month of marketMonths) {
-    const entriesThisMonth = marketMonthlyRaw.filter(r => r.month === month);
-    for (const e of entriesThisMonth) {
-      if (!accountState[e.account_id]) {
-        accountState[e.account_id] = { qty: 0, price: 0, type: e.category_type };
-      }
-      accountState[e.account_id].qty += e.month_qty;
-      if (e.latest_price != null) {
-        accountState[e.account_id].price = e.latest_price;
-      }
-    }
-    // Sum across all accounts for this month
-    const vals = { crypto: 0, metal: 0 };
-    for (const state of Object.values(accountState)) {
-      const val = state.qty * state.price;
-      if (state.type === 'crypto') vals.crypto += val;
-      if (state.type === 'precious_metal') vals.metal += val;
-    }
-    marketMonthValues[month] = vals;
+  type BankCashState = { balance: number; currency: string; type: 'bank' | 'cash' };
+  type MarketState = {
+    qty: number;
+    price_jpy: number; // most recent stored mark, converted to JPY
+    symbol: string | null;
+    type: 'crypto' | 'precious_metal';
+  };
+
+  const bankCashState = new Map<string, BankCashState>();
+  const marketState = new Map<string, MarketState>();
+
+  const bcByMonth = new Map<string, BankCashDeltaRow[]>();
+  for (const r of bankCashRaw) {
+    if (!bcByMonth.has(r.month)) bcByMonth.set(r.month, []);
+    bcByMonth.get(r.month)!.push(r);
+  }
+  const mktByMonth = new Map<string, MarketDeltaRow[]>();
+  for (const r of marketRaw) {
+    if (!mktByMonth.has(r.month)) mktByMonth.set(r.month, []);
+    mktByMonth.get(r.month)!.push(r);
   }
 
-  // Collect all months from both datasets
   const allMonthsSet = new Set<string>();
-  for (const r of bankCashMonthly) allMonthsSet.add(r.month);
-  for (const m of marketMonths) allMonthsSet.add(m);
+  for (const m of bcByMonth.keys()) allMonthsSet.add(m);
+  for (const m of mktByMonth.keys()) allMonthsSet.add(m);
   const allMonths = Array.from(allMonthsSet).sort();
+
+  const monthSnap = new Map<
+    string,
+    { bank: number; cash: number; crypto: number; metal: number }
+  >();
+
+  for (const month of allMonths) {
+    for (const r of bcByMonth.get(month) ?? []) {
+      const cur = upperCurrency(r.currency);
+      const existing = bankCashState.get(r.account_id);
+      if (existing) {
+        existing.balance += r.month_total;
+      } else {
+        bankCashState.set(r.account_id, {
+          balance: r.month_total,
+          currency: cur,
+          type: r.category_type,
+        });
+      }
+    }
+    for (const r of mktByMonth.get(month) ?? []) {
+      const existing = marketState.get(r.account_id);
+      const fx = fxToJpy(r.currency);
+      const stampedJpy =
+        r.price_as_of_month != null ? r.price_as_of_month * fx : null;
+      if (existing) {
+        existing.qty += r.month_qty;
+        if (stampedJpy != null) existing.price_jpy = stampedJpy;
+      } else {
+        marketState.set(r.account_id, {
+          qty: r.month_qty,
+          price_jpy: stampedJpy ?? 0,
+          symbol: r.symbol,
+          type: r.category_type,
+        });
+      }
+    }
+
+    let bank = 0;
+    let cash = 0;
+    for (const s of bankCashState.values()) {
+      const jpy = s.balance * fxToJpy(s.currency);
+      if (s.type === 'bank') bank += jpy;
+      else cash += jpy;
+    }
+    let crypto = 0;
+    let metal = 0;
+    for (const s of marketState.values()) {
+      const value = s.qty * s.price_jpy;
+      if (s.type === 'crypto') crypto += value;
+      else metal += value;
+    }
+    monthSnap.set(month, { bank, cash, crypto, metal });
+  }
+
+  // --- Current snapshot, with LIVE market prices ---
+
+  let bankCur = 0;
+  let cashCur = 0;
+  let cryptoCur = 0;
+  let metalCur = 0;
+  for (const a of currentAccts) {
+    const fx = fxToJpy(a.currency);
+    if (a.category_type === 'bank') {
+      bankCur += a.balance * fx;
+    } else if (a.category_type === 'cash') {
+      cashCur += a.balance * fx;
+    } else if (a.category_type === 'crypto') {
+      const live = a.symbol ? livePrices.crypto.get(a.symbol) : undefined;
+      const px = live ?? marketState.get(a.id)?.price_jpy ?? 0;
+      cryptoCur += a.balance * px;
+    } else if (a.category_type === 'precious_metal') {
+      const live = a.symbol ? livePrices.metal.get(a.symbol) : undefined;
+      const px = live ?? marketState.get(a.id)?.price_jpy ?? 0;
+      metalCur += a.balance * px;
+    }
+  }
+
+  // Re-mark the latest historical month with live prices so the chart's tail
+  // and the dashboard's `current` agree to the yen.
+  if (allMonths.length > 0) {
+    const latest = allMonths[allMonths.length - 1];
+    const snap = monthSnap.get(latest);
+    if (snap) {
+      snap.crypto = cryptoCur;
+      snap.metal = metalCur;
+      // For bank/cash, prefer the canonical current snapshot too — covers
+      // the case where an account had no entries this month but its balance
+      // still contributes.
+      snap.bank = bankCur;
+      snap.cash = cashCur;
+    }
+  }
+
+  // Slice to the requested window and compute MoM changes.
   const slicedMonths = allMonths.slice(-months);
-
-  // Index bank/cash by month
-  const bankCashByMonth = new Map<string, { bank: number; cash: number }>();
-  for (const r of bankCashMonthly) {
-    if (!bankCashByMonth.has(r.month)) bankCashByMonth.set(r.month, { bank: 0, cash: 0 });
-    const entry = bankCashByMonth.get(r.month)!;
-    if (r.category_type === 'bank') entry.bank = r.cumulative_total;
-    if (r.category_type === 'cash') entry.cash = r.cumulative_total;
-  }
-
-  // Forward-fill: for months with no entry in a dataset, carry forward the last known value
-  // We need per-category forward fill since bank and cash are independent
-  let lastBank = 0;
-  let lastCash = 0;
-  let lastCrypto = 0;
-  let lastMetal = 0;
-
-  // Pre-compute forward-filled bank/cash values across ALL months (not just sliced)
-  const bankCashFilled = new Map<string, { bank: number; cash: number }>();
-  for (const month of allMonths) {
-    const bc = bankCashByMonth.get(month);
-    if (bc) {
-      if (bc.bank !== 0) lastBank = bc.bank;
-      if (bc.cash !== 0) lastCash = bc.cash;
-    }
-    bankCashFilled.set(month, { bank: lastBank, cash: lastCash });
-  }
-
-  // Pre-compute forward-filled market values across ALL months
-  const marketFilled = new Map<string, { crypto: number; metal: number }>();
-  for (const month of allMonths) {
-    const mk = marketMonthValues[month];
-    if (mk) {
-      lastCrypto = mk.crypto;
-      lastMetal = mk.metal;
-    }
-    marketFilled.set(month, { crypto: lastCrypto, metal: lastMetal });
-  }
-
   const monthlyData = slicedMonths.map((month) => {
-    const bc = bankCashFilled.get(month) ?? { bank: 0, cash: 0 };
-    const mk = marketFilled.get(month) ?? { crypto: 0, metal: 0 };
-
-    const bank_total = bc.bank;
-    const cash_total = bc.cash;
-    const crypto_total = mk.crypto;
-    const metal_total = mk.metal;
-    const total_value = bank_total + cash_total + crypto_total + metal_total;
-    return { month, total_value, bank_total, cash_total, crypto_total, metal_total };
+    const s = monthSnap.get(month) ?? { bank: 0, cash: 0, crypto: 0, metal: 0 };
+    return {
+      month,
+      total_value: s.bank + s.cash + s.crypto + s.metal,
+      bank_total: s.bank,
+      cash_total: s.cash,
+      crypto_total: s.crypto,
+      metal_total: s.metal,
+    };
   });
 
-  // MoM changes
   const monthly = monthlyData.map((data, index) => {
     let mom_change = 0;
     let mom_change_pct = 0;
     if (index > 0) {
       const prev = monthlyData[index - 1];
       mom_change = data.total_value - prev.total_value;
-      mom_change_pct = prev.total_value !== 0 ? (mom_change / prev.total_value) * 100 : 0;
+      mom_change_pct =
+        prev.total_value !== 0 ? (mom_change / prev.total_value) * 100 : 0;
     }
-    return { ...data, mom_change, mom_change_pct: Math.round(mom_change_pct * 100) / 100 };
+    return {
+      ...data,
+      mom_change,
+      mom_change_pct: Math.round(mom_change_pct * 100) / 100,
+    };
   });
 
-  // Current totals
   const current = {
     month: new Date().toISOString().slice(0, 7),
-    total_value: 0,
-    bank_total: 0,
-    cash_total: 0,
-    crypto_total: 0,
-    metal_total: 0,
+    total_value: bankCur + cashCur + cryptoCur + metalCur,
+    bank_total: bankCur,
+    cash_total: cashCur,
+    crypto_total: cryptoCur,
+    metal_total: metalCur,
   };
-  for (const r of currentBankCash) {
-    if (r.category_type === 'bank') current.bank_total = r.total;
-    if (r.category_type === 'cash') current.cash_total = r.total;
-  }
-  for (const r of currentMarket) {
-    const val = r.total_qty * (r.latest_price ?? 0);
-    if (r.category_type === 'crypto') current.crypto_total += val;
-    if (r.category_type === 'precious_metal') current.metal_total += val;
-  }
-  current.total_value = current.bank_total + current.cash_total + current.crypto_total + current.metal_total;
 
   return Response.json({ monthly, current });
 }

@@ -1,6 +1,26 @@
 import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db';
 import { v4 as uuidv4 } from 'uuid';
+import { fetchJpyMarketPrices } from '@/lib/prices';
+
+interface AccountRow {
+  id: string;
+  category_id: string;
+  family_member_id: string;
+  name: string;
+  symbol: string | null;
+  currency: string;
+  notes: string | null;
+  created_at: string;
+  is_active: number;
+  category_name: string;
+  category_type: 'bank' | 'cash' | 'crypto' | 'precious_metal';
+  member_name: string;
+  balance: number;
+  quantity: number;
+  avg_unit_price: number;
+  cost_basis: number;
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -59,8 +79,34 @@ export async function GET(request: NextRequest) {
 
   sql += ' GROUP BY acc.id ORDER BY acc.created_at';
 
-  const accounts = db.prepare(sql).all(...params);
-  return Response.json(accounts);
+  const accounts = db.prepare(sql).all(...params) as AccountRow[];
+
+  // Resolve live JPY prices for any held crypto/metal symbols. Falls back to
+  // each account's avg_unit_price (cost basis) when the upstream is offline,
+  // so the UI degrades to the previous behavior rather than showing zeros.
+  const cryptoSymbols = accounts
+    .filter((a) => a.category_type === 'crypto' && a.symbol)
+    .map((a) => a.symbol as string);
+  const metalSymbols = accounts
+    .filter((a) => a.category_type === 'precious_metal' && a.symbol)
+    .map((a) => a.symbol as string);
+
+  const { crypto, metal } =
+    cryptoSymbols.length || metalSymbols.length
+      ? await fetchJpyMarketPrices(cryptoSymbols, metalSymbols)
+      : { crypto: new Map<string, number>(), metal: new Map<string, number>() };
+
+  const enriched = accounts.map((a) => {
+    let live_price: number | null = null;
+    if (a.category_type === 'crypto' && a.symbol) {
+      live_price = crypto.get(a.symbol) ?? null;
+    } else if (a.category_type === 'precious_metal' && a.symbol) {
+      live_price = metal.get(a.symbol) ?? null;
+    }
+    return { ...a, live_price };
+  });
+
+  return Response.json(enriched);
 }
 
 export async function POST(request: NextRequest) {

@@ -22,6 +22,10 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from "recharts"
 
 type MonthlyRow = {
@@ -140,6 +144,19 @@ export default function DashboardPage() {
     }))
   }, [report, convert])
 
+  // Pie slice per non-zero category, in display currency. Filtering keeps the
+  // donut readable when one of the categories has nothing in it.
+  const allocationData = useMemo(() => {
+    if (!current) return []
+    return CATEGORY_CARDS
+      .map((cat) => ({
+        name: cat.label,
+        value: convert(current[cat.key]),
+        color: cat.color,
+      }))
+      .filter((d) => d.value > 0)
+  }, [current, convert])
+
   if (loading) {
     return (
       <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -215,42 +232,97 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* Portfolio trend chart */}
-      {chartData.length > 1 && (
-        <Card className="eva-border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">Portfolio Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="gradTotal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00FFFF" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="#00FFFF" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,255,0.06)" />
-                  <XAxis dataKey="month" stroke="#555" fontSize={11} tickLine={false} />
-                  <YAxis stroke="#555" fontSize={11} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#111111",
-                      border: "1px solid rgba(0,255,255,0.2)",
-                      borderRadius: "8px",
-                      color: "#eee",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Area type="monotone" dataKey="total" stroke="#00FFFF" strokeWidth={2} fill="url(#gradTotal)" dot={false} />
-                  <Area type="monotone" dataKey="bank" stroke="#3b82f6" strokeWidth={1} fill="none" dot={false} />
-                  <Area type="monotone" dataKey="crypto" stroke="#FF4800" strokeWidth={1} fill="none" dot={false} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Allocation pie + Portfolio trend, side-by-side on lg+ */}
+      {(allocationData.length > 0 || chartData.length > 1) && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {allocationData.length > 0 && (
+            <Card className="eva-border lg:col-span-1">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">Allocation</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[280px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={allocationData}
+                        dataKey="value"
+                        nameKey="name"
+                        innerRadius="55%"
+                        outerRadius="85%"
+                        paddingAngle={2}
+                        stroke="none"
+                        label={({ percent }) =>
+                          percent != null && percent >= 0.05 ? `${(percent * 100).toFixed(0)}%` : ""
+                        }
+                        labelLine={false}
+                      >
+                        {allocationData.map((d) => (
+                          <Cell key={d.name} fill={d.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#111111",
+                          border: "1px solid rgba(0,255,255,0.2)",
+                          borderRadius: "8px",
+                          color: "#eee",
+                          fontSize: "12px",
+                        }}
+                        formatter={(value: number, name) => [
+                          formatCurrency(value, selectedCurrency),
+                          name as string,
+                        ]}
+                      />
+                      <Legend
+                        verticalAlign="bottom"
+                        wrapperStyle={{ fontSize: "11px" }}
+                        iconType="circle"
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {chartData.length > 1 && (
+            <Card className={`eva-border ${allocationData.length > 0 ? "lg:col-span-2" : "lg:col-span-3"}`}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">Portfolio Trend</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[280px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                      <defs>
+                        <linearGradient id="gradTotal" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#00FFFF" stopOpacity={0.2} />
+                          <stop offset="100%" stopColor="#00FFFF" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,255,0.06)" />
+                      <XAxis dataKey="month" stroke="#555" fontSize={11} tickLine={false} />
+                      <YAxis stroke="#555" fontSize={11} tickLine={false} axisLine={false} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#111111",
+                          border: "1px solid rgba(0,255,255,0.2)",
+                          borderRadius: "8px",
+                          color: "#eee",
+                          fontSize: "12px",
+                        }}
+                      />
+                      <Area type="monotone" dataKey="total" stroke="#00FFFF" strokeWidth={2} fill="url(#gradTotal)" dot={false} />
+                      <Area type="monotone" dataKey="bank" stroke="#3b82f6" strokeWidth={1} fill="none" dot={false} />
+                      <Area type="monotone" dataKey="crypto" stroke="#FF4800" strokeWidth={1} fill="none" dot={false} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
 
       {/* Per-member breakdown */}

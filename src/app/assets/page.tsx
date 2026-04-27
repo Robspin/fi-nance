@@ -41,7 +41,7 @@ import { Badge } from "@/components/ui/badge"
 import { PlusIcon, TrashIcon, ArrowUpIcon, ArrowDownIcon, ListIcon, ArchiveIcon } from "lucide-react"
 
 const CRYPTO_SYMBOLS = [
-  "bitcoin", "ethereum", "dogecoin", "solana", "cardano", "ripple", "polkadot", "litecoin",
+  "bitcoin", "ethereum", "dogecoin", "solana", "cardano", "ripple", "polkadot", "litecoin", "pepe",
 ]
 const METAL_SYMBOLS = [
   { symbol: "XAU", label: "XAU (Gold)" },
